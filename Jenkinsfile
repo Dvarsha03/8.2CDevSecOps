@@ -31,5 +31,24 @@ pipeline {
                 bat 'npm audit || exit /b 0'
             }
         }
+
+        stage('SonarCloud Analysis') {
+            steps {
+                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
+                    bat '''
+                    if not exist sonar-scanner-cli-5.0.1.3006-windows (
+                        powershell -Command "Invoke-WebRequest -Uri https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-5.0.1.3006-windows.zip -OutFile sonar-scanner.zip"
+                        powershell -Command "Expand-Archive -Path sonar-scanner.zip -DestinationPath . -Force"
+                    )
+
+                    sonar-scanner-cli-5.0.1.3006-windows\\bin\\sonar-scanner.bat ^
+                    -Dsonar.projectKey=Dvarsha03_8.2CDevSecOps ^
+                    -Dsonar.organization=dvarsha03 ^
+                    -Dsonar.host.url=https://sonarcloud.io ^
+                    -Dsonar.token=%SONAR_TOKEN%
+                    '''
+                }
+            }
+        }
     }
 }
